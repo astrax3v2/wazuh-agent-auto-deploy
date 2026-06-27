@@ -3,7 +3,7 @@
 ## 1. Clone Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/wazuh-agent-auto-deploy.git
+git clone https://github.com/astrax3v2/wazuh-agent-auto-deploy
 cd wazuh-agent-auto-deploy
 ```
 
