@@ -1,7 +1,5 @@
 # Combined Wazuh Agent Auto Deploy + Security Recommendation Enforcer
 
-This GitHub-ready package merges the previous Wazuh auto-deployment scripts and the security recommendation enforcer into **one combined workflow**.
-
 It installs, configures, hardens, validates, and reports Wazuh Agent readiness for:
 
 - Windows
