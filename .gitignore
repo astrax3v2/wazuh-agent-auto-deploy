@@ -1,0 +1,26 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+*.tmp
+*.bak
+*.backup
+
+# PowerShell artifacts
+*.ps1xml
+
+# Editor folders
+.vscode/
+.idea/
+
+# Local config/secrets
+.env
+*.secret
+*_password.txt
+
+# Archives
+*.zip
+*.tar
+*.gz
