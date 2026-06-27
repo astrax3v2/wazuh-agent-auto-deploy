@@ -1,4 +1,4 @@
-# Combined Wazuh Agent Auto Deploy + Security Recommendation Enforcer
+# Wazuh Agent Auto Deploy + Security Recommendation Enforcer
 
 It installs, configures, hardens, validates, and reports Wazuh Agent readiness for:
 
