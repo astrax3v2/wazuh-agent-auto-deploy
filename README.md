@@ -1,297 +1,198 @@
-# Wazuh Agent Auto Deploy
+# Combined Wazuh Agent Auto Deploy + Security Recommendation Enforcer
 
-Production-ready scripts to automatically deploy, configure, harden, and validate Wazuh Agent on:
+This GitHub-ready package merges the previous Wazuh auto-deployment scripts and the security recommendation enforcer into **one combined workflow**.
+
+It installs, configures, hardens, validates, and reports Wazuh Agent readiness for:
 
 - Windows
 - Linux
 - macOS
 
-This repository is designed for SOC/SIEM teams that need Wazuh agents to be:
-
-- Auto-starting after reboot
-- Auto-recovering after service failure
-- Configured for TCP-based Wazuh Manager communication
-- Ready for SOC monitoring
-- Collecting important Windows, Linux, and macOS security logs
-- Configured with FIM, SCA, Rootcheck, and Syscollector
-- Easy to deploy by asking the user for Wazuh Manager IP/FQDN and agent details
-
 ---
 
-## Features
+## What This Combined Script Does
 
-### Windows
-
-The Windows deployment script configures:
-
-- Wazuh Agent installation
-- Wazuh Manager IP/FQDN
-- Agent name
-- Agent group/profile
-- TCP 1514 communication
-- Agent reconnect settings
-- Windows service auto-start
-- Windows service recovery
-- Windows Security/System/Application logs
-- PowerShell Operational logs
-- Sysmon log channel
-- Microsoft Defender logs
-- RDP logs
-- WMI and WinRM logs
-- Task Scheduler logs
-- AppLocker logs
-- Windows Firewall logs
-- DNS Client logs
-- Windows audit policy
-- PowerShell Script Block Logging
-- PowerShell Module Logging
-- File Integrity Monitoring
-- SCA
-- Rootcheck
-- Syscollector
-
-### Linux
-
-The Linux deployment script configures:
-
-- Wazuh Agent installation
-- Debian/Ubuntu support
-- RHEL/CentOS/Rocky/AlmaLinux support
-- Wazuh Manager IP/FQDN
-- Agent name
-- Agent group/profile
-- TCP 1514 communication
-- Agent reconnect settings
-- systemd auto-start
-- systemd service recovery
-- `/var/log/auth.log`
-- `/var/log/secure`
-- `/var/log/syslog`
-- `/var/log/messages`
-- `/var/log/audit/audit.log`
-- journald collection
-- Apache logs
-- Nginx logs
-- MySQL/MariaDB/PostgreSQL logs
-- Docker logs
-- Firewall logs
-- Linux auditd rules
-- File Integrity Monitoring
-- SCA
-- Rootcheck
-- Syscollector
-
-### macOS
-
-The macOS deployment script configures:
-
-- Wazuh Agent installation
-- Wazuh Manager IP/FQDN
-- Agent name
-- Agent group/profile
-- TCP 1514 communication
-- Agent reconnect settings
-- LaunchDaemon auto-start
-- `/var/log/system.log`
-- `/var/log/install.log`
-- `/var/log/wifi.log`
-- `/var/audit/current`
-- macOS persistence path monitoring
-- File Integrity Monitoring
-- SCA
-- Rootcheck
-- Syscollector
-
----
-
-## Important Note
-
-These scripts make the Wazuh agent **auto-starting, auto-recovering, and SOC-ready whenever the endpoint and network are available**.
-
-They cannot prevent disconnection when:
-
-- Endpoint is powered off
-- Endpoint is sleeping
-- Endpoint has no network
-- Firewall blocks TCP 1514 or TCP 1515
-- Wazuh Manager is unavailable
-- Wazuh agent key is invalid
-- Agent name or ID is duplicated
-
----
-
-## Required Ports
-
-| Source | Destination | Port | Protocol | Purpose |
-|---|---|---:|---|---|
-| Wazuh Agent | Wazuh Manager | 1514 | TCP | Agent event forwarding |
-| Wazuh Agent | Wazuh Manager | 1515 | TCP | Agent enrollment |
-| Admin/SOC | Wazuh API | 55000 | TCP | Optional API access |
+| Area | Automated Action |
+|---|---|
+| User input | Asks for Wazuh Manager IP/FQDN, Agent Name, Agent Group/Profile |
+| Lab readiness | Creates lab-test/production-pilot acknowledgement marker |
+| Manager connectivity | Checks TCP `1514`, `1515`, and optional `55000` |
+| Agent install | Installs Wazuh Agent if missing |
+| Agent config | Writes SOC-ready `ossec.conf` |
+| Agent reliability | Enables auto-start and auto-recovery |
+| Enrollment | Optionally runs `agent-auth` |
+| Password policy | Checks/removes obvious plaintext enrollment password files |
+| Windows security | Enables audit policy and PowerShell logging |
+| Windows Sysmon | Checks and optionally installs Sysmon |
+| Linux auditd | Installs/enables auditd and applies SOC audit rules |
+| FIM tuning | Adds noise-control ignore entries |
+| Validation | Generates test event marker `WAZUH_READINESS_TEST` |
+| Reporting | Saves deployment/readiness report |
 
 ---
 
 ## Repository Structure
 
 ```text
-wazuh-agent-auto-deploy/
+wazuh-combined-auto-deploy/
 ├── README.md
 ├── LICENSE
 ├── .gitignore
-├── deploy-menu.sh
-├── configs/
-│   ├── ossec-windows-template.conf
-│   ├── ossec-linux-template.conf
-│   └── ossec-macos-template.conf
+├── deploy-combined-menu.sh
 ├── docs/
-│   ├── DEPLOYMENT.md
-│   ├── TROUBLESHOOTING.md
-│   └── SOC_LOG_SOURCES.md
+│   ├── USAGE.md
+│   ├── SECURITY_RECOMMENDATIONS.md
+│   └── VALIDATION.md
 └── scripts/
     ├── windows/
-    │   └── Deploy-Wazuh-Windows.ps1
+    │   └── Invoke-Wazuh-Combined-Windows.ps1
     ├── linux/
-    │   └── deploy-wazuh-linux.sh
+    │   └── invoke-wazuh-combined-linux.sh
     └── macos/
-        └── deploy-wazuh-macos.sh
+        └── invoke-wazuh-combined-macos.sh
 ```
 
 ---
 
-## Quick Start
+## Windows Usage
 
-### Windows
-
-Open PowerShell as Administrator:
+Run PowerShell as Administrator:
 
 ```powershell
 Set-ExecutionPolicy Bypass -Scope Process -Force
-.\scripts\windows\Deploy-Wazuh-Windows.ps1
+.\scripts\windows\Invoke-Wazuh-Combined-Windows.ps1
 ```
 
-The script will ask:
+With parameters:
+
+```powershell
+.\scripts\windows\Invoke-Wazuh-Combined-Windows.ps1 `
+  -Manager 10.10.10.50 `
+  -AgentName HR-LAPTOP-01 `
+  -AgentGroup "windows,soc,workstation" `
+  -InstallSysmonIfMissing
+```
+
+Non-interactive example:
+
+```powershell
+.\scripts\windows\Invoke-Wazuh-Combined-Windows.ps1 `
+  -Manager wazuh-manager.company.local `
+  -AgentName HR-LAPTOP-01 `
+  -AgentGroup "windows,soc,workstation" `
+  -NonInteractive `
+  -InstallSysmonIfMissing
+```
+
+---
+
+## Linux Usage
+
+```bash
+chmod +x deploy-combined-menu.sh
+./deploy-combined-menu.sh
+```
+
+Or directly:
+
+```bash
+sudo bash ./scripts/linux/invoke-wazuh-combined-linux.sh
+```
+
+With parameters:
+
+```bash
+sudo bash ./scripts/linux/invoke-wazuh-combined-linux.sh \
+  --manager 10.10.10.50 \
+  --agent-name linux-web-01 \
+  --agent-group linux,soc,webserver
+```
+
+Non-interactive:
+
+```bash
+sudo bash ./scripts/linux/invoke-wazuh-combined-linux.sh \
+  --manager wazuh-manager.company.local \
+  --agent-name linux-web-01 \
+  --agent-group linux,soc,webserver \
+  --non-interactive
+```
+
+---
+
+## macOS Usage
+
+```bash
+chmod +x deploy-combined-menu.sh
+./deploy-combined-menu.sh
+```
+
+Or directly:
+
+```bash
+sudo bash ./scripts/macos/invoke-wazuh-combined-macos.sh
+```
+
+With parameters:
+
+```bash
+sudo bash ./scripts/macos/invoke-wazuh-combined-macos.sh \
+  --manager 10.10.10.50 \
+  --agent-name macbook-finance-01 \
+  --agent-group macos,soc
+```
+
+---
+
+## Dashboard Validation
+
+After running the script, search in Wazuh Dashboard for:
 
 ```text
-Wazuh Manager IP/FQDN
-Agent name
-Agent group/profile
-Enrollment password, if used
-Whether to run agent-auth enrollment
+WAZUH_READINESS_TEST
 ```
 
----
-
-### Linux
-
-```bash
-chmod +x deploy-menu.sh
-./deploy-menu.sh
-```
-
-Or run directly:
-
-```bash
-sudo bash ./scripts/linux/deploy-wazuh-linux.sh
-```
-
----
-
-### macOS
-
-```bash
-chmod +x deploy-menu.sh
-./deploy-menu.sh
-```
-
-Or run directly:
-
-```bash
-sudo bash ./scripts/macos/deploy-wazuh-macos.sh
-```
-
----
-
-## Example Inputs
+For Windows, also search:
 
 ```text
-Wazuh Manager Type: FQDN
-Wazuh Manager: wazuh-manager.company.local
-Agent Name: HR-LAPTOP-01
-Agent Group: windows,soc,workstation
-Enrollment Password: ********
-Run Enrollment: Y
-```
-
-or:
-
-```text
-Wazuh Manager Type: IP
-Wazuh Manager: 10.10.10.50
-Agent Name: linux-web-01
-Agent Group: linux,soc,webserver
-Enrollment Password:
-Run Enrollment: Y
+WazuhReadiness
+event.id: 9001
 ```
 
 ---
 
-## Validation
+## Reports
 
 ### Windows
 
-```powershell
-Get-Service WazuhSvc
-Test-NetConnection WAZUH_MANAGER_IP_OR_FQDN -Port 1514
-Test-NetConnection WAZUH_MANAGER_IP_OR_FQDN -Port 1515
-Get-Content "C:\Program Files (x86)\ossec-agent\ossec.log" -Tail 50
+```text
+C:\ProgramData\WazuhCombinedDeploy\
 ```
 
 ### Linux
 
-```bash
-sudo systemctl status wazuh-agent
-nc -vz WAZUH_MANAGER_IP_OR_FQDN 1514
-nc -vz WAZUH_MANAGER_IP_OR_FQDN 1515
-sudo tail -n 50 /var/ossec/logs/ossec.log
+```text
+/var/log/wazuh-combined-deploy/
 ```
 
 ### macOS
 
-```bash
-sudo /Library/Ossec/bin/wazuh-control status
-nc -vz WAZUH_MANAGER_IP_OR_FQDN 1514
-nc -vz WAZUH_MANAGER_IP_OR_FQDN 1515
-sudo tail -n 50 /Library/Ossec/logs/ossec.log
+```text
+/Library/Logs/WazuhCombinedDeploy/
 ```
 
 ---
 
-## Recommended GitHub Upload Commands
+## Important Note
 
-```bash
-git init
-git add .
-git commit -m "Initial Wazuh agent auto deployment scripts"
-git branch -M main
-git remote add origin https://github.com/astrax3v2/wazuh-agent-auto-deploy
-git push -u origin main
-```
+This script makes the agent production-ready and self-recovering **when the endpoint and network are available**.
 
----
+It cannot prevent disconnection when:
 
-## Security Recommendation
-
-Before production deployment:
-
-1. Test the scripts in a lab.
-2. Confirm Wazuh Manager ports are open.
-3. Confirm enrollment password handling policy.
-4. Review FIM paths for noise.
-5. Confirm Sysmon is installed on Windows endpoints.
-6. Confirm auditd is installed on Linux.
-7. Validate event ingestion in Wazuh Dashboard.
-
----
-
-## License
-
-This project is released under the MIT License.
+- Endpoint is powered off
+- Endpoint is asleep
+- Endpoint has no network
+- Firewall blocks Wazuh ports
+- Wazuh Manager is unavailable
+- Agent key is invalid
+- Agent name/ID is duplicated
