@@ -272,7 +272,7 @@ git init
 git add .
 git commit -m "Initial Wazuh agent auto deployment scripts"
 git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/wazuh-agent-auto-deploy.git
+git remote add origin https://github.com/astrax3v2/wazuh-agent-auto-deploy
 git push -u origin main
 ```
 
