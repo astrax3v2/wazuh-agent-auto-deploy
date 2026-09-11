@@ -1,0 +1,79 @@
+<Sysmon schemaversion="4.90">
+  <HashAlgorithms>sha256,imphash</HashAlgorithms>
+  <CheckRevocation>false</CheckRevocation>
+  <EventFiltering>
+    <!-- Event ID 1: Process creation -->
+    <ProcessCreate onmatch="exclude">
+      <Image condition="is">C:\Windows\System32\conhost.exe</Image>
+    </ProcessCreate>
+
+    <!-- Event ID 3: Network connections -->
+    <NetworkConnect onmatch="exclude">
+      <DestinationIp condition="is">127.0.0.1</DestinationIp>
+      <DestinationIp condition="is">::1</DestinationIp>
+    </NetworkConnect>
+
+    <!-- Event ID 6: Driver loading -->
+    <DriverLoad onmatch="exclude" />
+
+    <!-- Event ID 7: Image/DLL loading. High-volume: tune after pilot. -->
+    <ImageLoad onmatch="include">
+      <ImageLoaded condition="end with">.dll</ImageLoaded>
+      <ImageLoaded condition="end with">.sys</ImageLoaded>
+      <ImageLoaded condition="end with">.ocx</ImageLoaded>
+    </ImageLoad>
+
+    <!-- Event ID 8: CreateRemoteThread -->
+    <CreateRemoteThread onmatch="exclude" />
+
+    <!-- Event ID 10: Process access, useful for LSASS/credential-access detections. -->
+    <ProcessAccess onmatch="include">
+      <TargetImage condition="is">C:\Windows\System32\lsass.exe</TargetImage>
+      <TargetImage condition="is">C:\Windows\System32\winlogon.exe</TargetImage>
+      <TargetImage condition="is">C:\Windows\System32\services.exe</TargetImage>
+    </ProcessAccess>
+
+    <!-- Event ID 11: File create -->
+    <FileCreate onmatch="include">
+      <TargetFilename condition="contains">\Startup\</TargetFilename>
+      <TargetFilename condition="contains">\System32\Tasks\</TargetFilename>
+      <TargetFilename condition="contains">\Temp\</TargetFilename>
+      <TargetFilename condition="end with">.ps1</TargetFilename>
+      <TargetFilename condition="end with">.bat</TargetFilename>
+      <TargetFilename condition="end with">.cmd</TargetFilename>
+      <TargetFilename condition="end with">.vbs</TargetFilename>
+      <TargetFilename condition="end with">.js</TargetFilename>
+      <TargetFilename condition="end with">.exe</TargetFilename>
+      <TargetFilename condition="end with">.dll</TargetFilename>
+    </FileCreate>
+
+    <!-- Event IDs 12/13/14: Registry persistence and configuration changes -->
+    <RegistryEvent onmatch="include">
+      <TargetObject condition="contains">\CurrentVersion\Run</TargetObject>
+      <TargetObject condition="contains">\CurrentVersion\RunOnce</TargetObject>
+      <TargetObject condition="contains">\Services\</TargetObject>
+      <TargetObject condition="contains">\Winlogon\</TargetObject>
+      <TargetObject condition="contains">\Image File Execution Options\</TargetObject>
+    </RegistryEvent>
+
+    <!-- Event ID 17/18: Named pipes -->
+    <PipeEvent onmatch="exclude" />
+
+    <!-- Event ID 19/20/21: WMI persistence -->
+    <WmiEvent onmatch="exclude" />
+
+    <!-- Event ID 22: DNS -->
+    <DnsQuery onmatch="exclude">
+      <QueryName condition="end with">.local</QueryName>
+    </DnsQuery>
+
+    <!-- Event ID 23/26: File deletion -->
+    <FileDelete onmatch="include">
+      <TargetFilename condition="end with">.exe</TargetFilename>
+      <TargetFilename condition="end with">.dll</TargetFilename>
+      <TargetFilename condition="end with">.ps1</TargetFilename>
+      <TargetFilename condition="end with">.bat</TargetFilename>
+      <TargetFilename condition="end with">.cmd</TargetFilename>
+    </FileDelete>
+  </EventFiltering>
+</Sysmon>
